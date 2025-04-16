@@ -5666,6 +5666,51 @@ AddCommand("setprefix", {}, "changes your prefix", {"1"}, function(Caller, Args)
     end
 end)
 
+AddCommand("bang", {"player", "speed"}, "uhh", {"1"}, function(Caller, Args)
+	execCmd("unbang")
+	wait()
+
+	local humanoid = Caller.Character:FindFirstChildWhichIsA("Humanoid")
+	if not humanoid then return "couldn't find your humanoid lol" end
+
+	local anim = Instance.new("Animation")
+	anim.AnimationId = not r15(Caller) and "rbxassetid://148840371" or "rbxassetid://5918726674"
+
+	local track = humanoid:LoadAnimation(anim)
+	track:Play(0.1, 1, 1)
+	track:AdjustSpeed(tonumber(Args[2]) or 3)
+
+	local diedConn
+	local loopConn
+
+	diedConn = humanoid.Died:Connect(function()
+		track:Stop()
+		anim:Destroy()
+		if diedConn then diedConn:Disconnect() end
+		if loopConn then loopConn:Disconnect() end
+	end)
+
+	if Args[1] then
+		local targets = getPlayer(Args[1], Caller)
+		for _, plr in pairs(targets) do
+			local target = Players[plr]
+			if target and target.Character then
+				local offset = CFrame.new(0, 0, 1.1)
+				loopConn = RunService.Stepped:Connect(function()
+					pcall(function()
+						local otherRoot = getTorso(target.Character)
+						local myRoot = getRoot(Caller.Character)
+						myRoot.CFrame = otherRoot.CFrame * offset
+					end)
+				end)
+			end
+		end
+	end
+
+	return "banging..."
+end)
+
+
 AddCommand("setcommandbarprefix", {"setcprefix"}, "sets your command bar prefix to whatever you input", {}, function()
     ChooseNewPrefix = true
     local CloseNotif = Utils.Notify(LocalPlayer, "New Prefix", "Input the new prefix you would like to have", 7);
