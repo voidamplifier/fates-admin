@@ -5666,17 +5666,23 @@ AddCommand("setprefix", {}, "changes your prefix", {"1"}, function(Caller, Args)
     end
 end)
 
-AddCommand("bang", {"player", "speed"}, "uhh", {"1"}, function(Caller, Args)
+AddCommand("bang", {"player", "speed"}, "banger moment", {"1"}, function(Caller, Args)
 	execCmd("unbang")
 	wait()
 
-	local humanoid = Caller.Character:FindFirstChildWhichIsA("Humanoid")
+	local humanoid = Caller.Character and Caller.Character:FindFirstChildWhichIsA("Humanoid")
 	if not humanoid then return "couldn't find your humanoid lol" end
+
+	local animator = humanoid:FindFirstChildOfClass("Animator")
+	if not animator then
+		animator = Instance.new("Animator")
+		animator.Parent = humanoid
+	end
 
 	local anim = Instance.new("Animation")
 	anim.AnimationId = not r15(Caller) and "rbxassetid://148840371" or "rbxassetid://5918726674"
 
-	local track = humanoid:LoadAnimation(anim)
+	local track = animator:LoadAnimation(anim)
 	track:Play(0.1, 1, 1)
 	track:AdjustSpeed(tonumber(Args[2]) or 3)
 
@@ -5709,6 +5715,7 @@ AddCommand("bang", {"player", "speed"}, "uhh", {"1"}, function(Caller, Args)
 
 	return "banging..."
 end)
+
 
 
 AddCommand("setcommandbarprefix", {"setcprefix"}, "sets your command bar prefix to whatever you input", {}, function()
